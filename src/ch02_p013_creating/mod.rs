@@ -1,5 +1,4 @@
-use tracing::info;
-
+#[allow(unused_macros)]
 macro_rules! my_vec {
   () => [
     Vec::new()
@@ -34,7 +33,7 @@ macro_rules! my_vec {
 
 #[cfg(test)]
 mod test {
-  use super::*;
+  use tracing::info;
 
   #[test]
   fn test1() {
