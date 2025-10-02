@@ -1,6 +1,7 @@
 use std::sync::Once;
 
 mod ch02_p013_creating;
+mod ch02_p019_varargs;
 
 static TRACING_INIT: Once = Once::new();
 
