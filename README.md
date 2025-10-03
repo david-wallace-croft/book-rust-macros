@@ -13,6 +13,7 @@
 - cargo test --lib -- ch02_p013_creating::test::test1
 - cargo test --lib -- ch02_p019_varargs::test::test1
 - cargo test --lib -- ch02_p023_newtypes::test::test1
+- cargo test --lib -- ch02_p023_newtypes::test::test2
 
 ## History
 
