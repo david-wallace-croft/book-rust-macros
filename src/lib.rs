@@ -3,6 +3,7 @@ use std::sync::Once;
 mod ch02_p013_creating;
 mod ch02_p019_varargs;
 mod ch02_p023_newtypes;
+mod ch02_p028_dsls;
 
 static TRACING_INIT: Once = Once::new();
 

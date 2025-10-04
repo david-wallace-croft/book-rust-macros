@@ -7,6 +7,7 @@
 
 - Code adapted from the book "Write Powerful Rust Macros" by Sam Van Overmeire
   - https://www.manning.com/books/write-powerful-rust-macros
+  - https://livebook.manning.com/forum?product=vanovermeire
 
 ## Usage
 
@@ -14,6 +15,8 @@
 - cargo test --lib -- ch02_p019_varargs::test::test1
 - cargo test --lib -- ch02_p023_newtypes::test::test1
 - cargo test --lib -- ch02_p023_newtypes::test::test2
+- cargo test --lib -- ch02_p028_dsls::test::test1
+- cargo test --lib -- ch02_p028_dsls::test::test2
 
 ## History
 
