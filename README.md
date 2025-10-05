@@ -17,6 +17,9 @@
 - cargo test --lib -- ch02_p023_newtypes::test::test2
 - cargo test --lib -- ch02_p028_dsls::test::test1
 - cargo test --lib -- ch02_p028_dsls::test::test2
+- cargo test --lib -- ch02_p031_composing::test::test1
+- cargo test --lib -- ch02_p031_composing::test::test2
+- cargo test --lib -- ch02_p031_composing::test::test3
 
 ## History
 
