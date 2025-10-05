@@ -9,6 +9,7 @@ mod ch02_p038_ex1;
 mod ch02_p038_ex2;
 mod ch02_p038_ex3;
 mod ch02_p038_ex4;
+mod ch02_p038_ex5;
 
 static TRACING_INIT: Once = Once::new();
 
