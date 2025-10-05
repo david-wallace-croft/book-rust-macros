@@ -21,6 +21,9 @@
 - cargo test --lib -- ch02_p031_composing::test::test2
 - cargo test --lib -- ch02_p031_composing::test::test3
 - cargo test --lib -- ch02_p038_ex1::test::test1
+- cargo test --lib -- ch02_p038_ex2::test::test1
+- cargo test --lib -- ch02_p038_ex2::test::test2
+- cargo test --lib -- ch02_p038_ex2::test::test3
 
 ## History
 
