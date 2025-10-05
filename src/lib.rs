@@ -5,6 +5,7 @@ mod ch02_p019_varargs;
 mod ch02_p023_newtypes;
 mod ch02_p028_dsls;
 mod ch02_p031_composing;
+mod ch02_p038_ex1;
 
 static TRACING_INIT: Once = Once::new();
 
