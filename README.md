@@ -29,6 +29,7 @@
 - cargo test --lib -- ch02_p038_ex5::test::test1
 - cargo test --lib -- ch02_p038_ex5::test::test2
 - cargo test --lib -- ch02_p038_ex5::test::test3
+- cargo test --lib -- ch02_p038_ex6::test::test1
 
 ## History
 
