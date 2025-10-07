@@ -6,6 +6,9 @@ version = 4
 name = "book-rust-macros"
 version = "0.0.0-SNAPSHOT"
 dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
  "tracing",
  "tracing-subscriber",
 ]

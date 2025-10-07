@@ -1,4 +1,7 @@
-use std::sync::Once;
+use ::proc_macro::TokenStream;
+use ::quote::quote;
+use ::std::sync::Once;
+use ::syn::{DeriveInput, Ident, parse_macro_input};
 
 mod ch02_p013_creating;
 mod ch02_p019_varargs;
@@ -22,4 +25,22 @@ fn init_tracing() {
 
     tracing_subscriber::fmt::init();
   });
+}
+
+// For test_ch03_p048_generating
+#[proc_macro_derive(Hello)]
+pub fn hello(item: TokenStream) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let add_hello_world: proc_macro2::TokenStream = quote! {
+    impl #name {
+      fn hello_world(&self) -> String {
+        "Hello, World!".into()
+      }
+    }
+  };
+
+  add_hello_world.into()
 }
