@@ -2,6 +2,7 @@ use ::proc_macro::TokenStream;
 use ::quote::quote;
 use ::std::sync::Once;
 use ::syn::{DeriveInput, Ident, parse_macro_input};
+use proc_macro::TokenTree;
 
 mod ch02_p013_creating;
 mod ch02_p019_varargs;
@@ -43,4 +44,27 @@ pub fn hello(item: TokenStream) -> TokenStream {
   };
 
   add_hello_world.into()
+}
+
+// For test_ch03_p052_same
+#[proc_macro_derive(HelloAlt)]
+pub fn hello_alt(item: TokenStream) -> TokenStream {
+  fn ident_name(item: TokenTree) -> String {
+    match item {
+      TokenTree::Ident(i) => i.to_string(),
+      _ => panic!("no ident"),
+    }
+  }
+
+  let name: String = ident_name(item.into_iter().nth(1).unwrap());
+
+  let formatted: String = format!(
+    "impl {} {{ fn hello_alt(&self) -> String \
+    {{ format!(\"Howdy, World!\") }} }} ",
+    name
+  );
+
+  let parsed: Result<TokenStream, proc_macro::LexError> = formatted.parse();
+
+  parsed.unwrap()
 }

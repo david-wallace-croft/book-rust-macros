@@ -31,6 +31,7 @@
 - cargo test --lib -- ch02_p038_ex5::test::test3
 - cargo test --lib -- ch02_p038_ex6::test::test1
 - cargo test --test test_ch03_p048_generating
+- cargo test --test test_ch03_p052_same
 
 ## History
 
