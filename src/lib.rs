@@ -1,8 +1,9 @@
 use ::proc_macro::TokenStream;
+use ::proc_macro::TokenTree;
 use ::quote::quote;
 use ::std::sync::Once;
 use ::syn::{DeriveInput, Ident, parse_macro_input};
-use proc_macro::TokenTree;
+use ::venial::{Declaration, Enum, Struct, parse_declaration};
 
 mod ch02_p013_creating;
 mod ch02_p019_varargs;
@@ -67,4 +68,32 @@ pub fn hello_alt(item: TokenStream) -> TokenStream {
   let parsed: Result<TokenStream, proc_macro::LexError> = formatted.parse();
 
   parsed.unwrap()
+}
+
+// For test_ch03_p053_venial
+#[proc_macro_derive(HelloVenial)]
+pub fn hello_venial(item: TokenStream) -> TokenStream {
+  let declaration = parse_declaration(item.into()).unwrap();
+
+  let name = match declaration {
+    Declaration::Struct(Struct {
+      name,
+      ..
+    }) => name,
+    Declaration::Enum(Enum {
+      name,
+      ..
+    }) => name,
+    _ => panic!("only implemented for struct and enum"),
+  };
+
+  let add_hello_world: proc_macro2::TokenStream = quote! {
+    impl #name {
+      fn hello_venial(&self) -> String {
+        "Aloha, World!".into()
+      }
+    }
+  };
+
+  add_hello_world.into()
 }

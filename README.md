@@ -32,6 +32,7 @@
 - cargo test --lib -- ch02_p038_ex6::test::test1
 - cargo test --test test_ch03_p048_generating
 - cargo test --test test_ch03_p052_same
+- cargo test --test test_ch03_p053_venial
 
 ## History
 
