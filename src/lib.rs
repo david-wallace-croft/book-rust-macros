@@ -73,9 +73,9 @@ pub fn hello_alt(item: TokenStream) -> TokenStream {
 // For test_ch03_p053_venial
 #[proc_macro_derive(HelloVenial)]
 pub fn hello_venial(item: TokenStream) -> TokenStream {
-  let declaration = parse_declaration(item.into()).unwrap();
+  let declaration: Declaration = parse_declaration(item.into()).unwrap();
 
-  let name = match declaration {
+  let name: Ident = match declaration {
     Declaration::Struct(Struct {
       name,
       ..
@@ -96,4 +96,24 @@ pub fn hello_venial(item: TokenStream) -> TokenStream {
   };
 
   add_hello_world.into()
+}
+
+// For test_ch03_p055_ex1
+#[proc_macro_derive(UpperCaseName)]
+pub fn uppercase(item: TokenStream) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let uppercase_name: String = name.to_string().to_uppercase();
+
+  let add_uppercase: proc_macro2::TokenStream = quote! {
+    impl #name {
+      fn uppercase(&self) -> String {
+        format!("{}", #uppercase_name)
+      }
+    }
+  };
+
+  add_uppercase.into()
 }
