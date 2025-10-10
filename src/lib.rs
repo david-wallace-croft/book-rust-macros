@@ -99,6 +99,7 @@ pub fn hello_venial(item: TokenStream) -> TokenStream {
 }
 
 // For test_ch03_p055_ex1
+// For test_ch03_p055_ex3
 #[proc_macro_derive(UpperCaseName)]
 pub fn uppercase(item: TokenStream) -> TokenStream {
   let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
@@ -111,6 +112,10 @@ pub fn uppercase(item: TokenStream) -> TokenStream {
     impl #name {
       fn uppercase(&self) -> String {
         format!("{}", #uppercase_name)
+      }
+
+      fn testing_testing() -> String {
+        "one two three".into()
       }
     }
   };
