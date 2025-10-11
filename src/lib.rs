@@ -122,3 +122,21 @@ pub fn uppercase(item: TokenStream) -> TokenStream {
 
   add_uppercase.into()
 }
+
+// For test_ch03_p055_ex4
+#[proc_macro_derive(HelloInput)]
+pub fn hello_input(item: TokenStream) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let add_hello_world: proc_macro2::TokenStream = quote! {
+    impl #name {
+      fn hello_input(&self) -> String {
+        format!("Hello, {}!", stringify!(#name))
+      }
+    }
+  };
+
+  add_hello_world.into()
+}

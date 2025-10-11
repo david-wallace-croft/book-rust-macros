@@ -35,6 +35,7 @@
 - cargo test --test test_ch03_p053_venial
 - cargo test --test test_ch03_p055_ex1
 - cargo test --test test_ch03_p055_ex3
+- cargo test --test test_ch03_p055_ex4
 
 ## History
 
