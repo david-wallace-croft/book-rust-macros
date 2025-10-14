@@ -60,11 +60,11 @@ mod test {
   fn test1() {
     crate::init_tracing();
 
-    let mut the_poor = Account {
+    let mut the_poor: Account = Account {
       money: 0,
     };
 
-    let mut the_rich = Account {
+    let mut the_rich: Account = Account {
       money: 200,
     };
 

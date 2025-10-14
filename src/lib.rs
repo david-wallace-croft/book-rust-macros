@@ -1,3 +1,5 @@
+// #![warn(clippy::pedantic)]
+
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::quote;
