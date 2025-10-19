@@ -1,6 +1,7 @@
 // #![warn(clippy::pedantic)]
 
 use crate::ch04_p069_parse::StructFieldParse;
+use crate::ch04_p071_going::StructFieldGoing;
 
 use self::ch04_p067_more::StructField;
 use ::proc_macro::TokenStream;
@@ -28,6 +29,7 @@ mod ch02_p038_ex5;
 mod ch02_p038_ex6;
 mod ch04_p067_more;
 mod ch04_p069_parse;
+mod ch04_p071_going;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -289,6 +291,43 @@ pub fn public_parse(
   let builder_fields = named_fields
     .iter()
     .map(|f| parse2::<StructFieldParse>(f.to_token_stream()).unwrap());
+
+  let public_version: proc_macro2::TokenStream = quote! {
+    pub struct #name {
+      #(#builder_fields,)*
+    }
+  };
+
+  public_version.into()
+}
+
+// For test_ch04_p071_going
+#[proc_macro_attribute]
+pub fn public_going(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let named_fields: Punctuated<Field, Comma> = match ast.data {
+    Data::Struct(data_struct) => {
+      let fields: Fields = data_struct.fields;
+
+      match fields {
+        Fields::Named(fields_named) => fields_named.named,
+        Fields::Unnamed(_fields_unnamed) => unimplemented!(),
+        Fields::Unit => unimplemented!(),
+      }
+    },
+    Data::Enum(_data_enum) => unimplemented!(),
+    Data::Union(_data_union) => unimplemented!(),
+  };
+
+  let builder_fields = named_fields
+    .iter()
+    .map(|f| parse2::<StructFieldGoing>(f.to_token_stream()).unwrap());
 
   let public_version: proc_macro2::TokenStream = quote! {
     pub struct #name {

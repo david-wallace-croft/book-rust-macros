@@ -40,6 +40,8 @@
 - cargo expand --test test_ch04_p060_first
 - cargo expand --test test_ch04_p061_getting
 - cargo expand --test test_ch04_p067_more
+- cargo expand --test test_ch04_p069_parse
+- cargo expand --test test_ch04_p071_going
 
 ## History
 
