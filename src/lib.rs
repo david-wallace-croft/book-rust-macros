@@ -339,3 +339,16 @@ pub fn public_going(
 
   public_version.into()
 }
+
+// For test_ch04_p076_ex1
+#[proc_macro_attribute]
+pub fn delete(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let _ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let public_version: proc_macro2::TokenStream = quote! {};
+
+  public_version.into()
+}
