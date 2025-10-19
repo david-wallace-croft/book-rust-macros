@@ -9,7 +9,7 @@ use ::proc_macro::TokenTree;
 use ::quote::ToTokens;
 use ::quote::quote;
 use ::std::sync::Once;
-use ::syn::punctuated::Punctuated;
+use ::syn::punctuated::{IntoIter, Punctuated};
 use ::syn::token::Comma;
 use ::syn::{
   Data, DeriveInput, Field, Fields, Ident, Type, parse_macro_input, parse2,
@@ -351,4 +351,78 @@ pub fn delete(
   let public_version: proc_macro2::TokenStream = quote! {};
 
   public_version.into()
+}
+
+// For test_ch04_p076_ex5
+#[proc_macro_attribute]
+pub fn public_ex5(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let attributes: &Vec<syn::Attribute> = &ast.attrs;
+
+  let basic_output: proc_macro2::TokenStream = match ast.data {
+    Data::Struct(data_struct) => {
+      let fields: Fields = data_struct.fields;
+
+      match fields {
+        Fields::Named(fields_named) => {
+          let punctuated: Punctuated<Field, Comma> = fields_named.named;
+
+          let builder_fields = punctuated.iter().map(|f: &Field| {
+            let field_name: &Option<Ident> = &f.ident;
+
+            let ty: &Type = &f.ty;
+
+            quote! { pub #field_name: #ty }
+          });
+
+          quote! {
+            pub struct #name {
+              #(#builder_fields,)*
+            }
+          }
+        },
+        Fields::Unnamed(fields_unnamed) => {
+          let punctuated: Punctuated<Field, Comma> = fields_unnamed.unnamed;
+
+          let builder_fields = punctuated.iter().map(|f| {
+            let ty: &Type = &f.ty;
+
+            quote! { pub #ty }
+          });
+
+          quote! {
+            pub struct #name(
+              #(#builder_fields,)*
+            );
+          }
+        },
+        Fields::Unit => unimplemented!(),
+      }
+    },
+    Data::Enum(data_enum) => {
+      let punctuated: Punctuated<syn::Variant, Comma> = data_enum.variants;
+
+      let as_iter: IntoIter<syn::Variant> = punctuated.into_iter();
+
+      quote!(
+        pub enum #name {
+          #(#as_iter,)*
+        }
+      )
+    },
+    Data::Union(_data_union) => unimplemented!(),
+  };
+
+  let token_stream: proc_macro2::TokenStream = quote! {
+    #(#attributes)*
+    #basic_output
+  };
+
+  token_stream.into()
 }
