@@ -142,3 +142,16 @@ pub fn hello_input(item: TokenStream) -> TokenStream {
 
   add_hello_world.into()
 }
+
+// For test_ch04_p059_attribute
+#[proc_macro_attribute]
+pub fn public(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let _ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let public_version = quote! {};
+
+  public_version.into()
+}
