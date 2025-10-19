@@ -151,7 +151,27 @@ pub fn public(
 ) -> TokenStream {
   let _ast: DeriveInput = parse_macro_input!(item as DeriveInput);
 
-  let public_version = quote! {};
+  let public_version: proc_macro2::TokenStream = quote! {};
+
+  public_version.into()
+}
+
+// For test_ch04_p060_first
+#[proc_macro_attribute]
+pub fn public_first(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let public_version: proc_macro2::TokenStream = quote! {
+    pub struct #name {
+      pub first: String,
+      pub second: u32,
+    }
+  };
 
   public_version.into()
 }

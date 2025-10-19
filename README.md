@@ -37,6 +37,7 @@
 - cargo test --test test_ch03_p055_ex3
 - cargo test --test test_ch03_p055_ex4
 - cargo expand --test test_ch04_p059_attribute
+- cargo expand --test test_ch04_p060_first
 
 ## History
 
