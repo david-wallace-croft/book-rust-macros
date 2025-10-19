@@ -1,5 +1,6 @@
 // #![warn(clippy::pedantic)]
 
+use self::ch04_p067_more::StructField;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::quote;
@@ -20,6 +21,7 @@ mod ch02_p038_ex3;
 mod ch02_p038_ex4;
 mod ch02_p038_ex5;
 mod ch02_p038_ex6;
+mod ch04_p067_more;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -209,6 +211,41 @@ pub fn public_getting(
 
     quote! { pub #name: #ty }
   });
+
+  let public_version: proc_macro2::TokenStream = quote! {
+    pub struct #name {
+      #(#builder_fields,)*
+    }
+  };
+
+  public_version.into()
+}
+
+// For test_ch04_p067_more
+#[proc_macro_attribute]
+pub fn public_more(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let named_fields: Punctuated<Field, Comma> = match ast.data {
+    Data::Struct(data_struct) => {
+      let fields: Fields = data_struct.fields;
+
+      match fields {
+        Fields::Named(fields_named) => fields_named.named,
+        Fields::Unnamed(_fields_unnamed) => unimplemented!(),
+        Fields::Unit => unimplemented!(),
+      }
+    },
+    Data::Enum(_data_enum) => unimplemented!(),
+    Data::Union(_data_union) => unimplemented!(),
+  };
+
+  let builder_fields = named_fields.iter().map(StructField::new);
 
   let public_version: proc_macro2::TokenStream = quote! {
     pub struct #name {
