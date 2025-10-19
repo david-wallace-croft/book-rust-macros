@@ -309,6 +309,8 @@ pub fn public_going(
 ) -> TokenStream {
   let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
 
+  eprintln!("{:#?}", &ast);
+
   let name: Ident = ast.ident;
 
   let named_fields: Punctuated<Field, Comma> = match ast.data {

@@ -7,6 +7,6 @@ struct Example {
 }
 
 #[test]
-fn test_ch04_p069_going() {
+fn test_ch04_p071_going() {
   // empty
 }
