@@ -4,7 +4,9 @@ use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::quote;
 use ::std::sync::Once;
-use ::syn::{DeriveInput, Ident, parse_macro_input};
+use ::syn::punctuated::Punctuated;
+use ::syn::token::Comma;
+use ::syn::{Data, DeriveInput, Field, Fields, Ident, Type, parse_macro_input};
 use ::venial::{Declaration, Enum, Struct, parse_declaration};
 
 mod ch02_p013_creating;
@@ -170,6 +172,47 @@ pub fn public_first(
     pub struct #name {
       pub first: String,
       pub second: u32,
+    }
+  };
+
+  public_version.into()
+}
+
+// For test_ch04_p061_getting
+#[proc_macro_attribute]
+pub fn public_getting(
+  _attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  let named_fields: Punctuated<Field, Comma> = match ast.data {
+    Data::Struct(data_struct) => {
+      let fields: Fields = data_struct.fields;
+
+      match fields {
+        Fields::Named(fields_named) => fields_named.named,
+        Fields::Unnamed(_fields_unnamed) => unimplemented!(),
+        Fields::Unit => unimplemented!(),
+      }
+    },
+    Data::Enum(_data_enum) => unimplemented!(),
+    Data::Union(_data_union) => unimplemented!(),
+  };
+
+  let builder_fields = named_fields.iter().map(|f: &Field| {
+    let name: &Option<Ident> = &f.ident;
+
+    let ty: &Type = &f.ty;
+
+    quote! { pub #name: #ty }
+  });
+
+  let public_version: proc_macro2::TokenStream = quote! {
+    pub struct #name {
+      #(#builder_fields,)*
     }
   };
 
