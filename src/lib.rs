@@ -426,3 +426,20 @@ pub fn public_ex5(
 
   token_stream.into()
 }
+
+// For test_ch05_p081_recreating
+#[proc_macro]
+pub fn private(item: TokenStream) -> TokenStream {
+  let item_as_stream: quote::__private::TokenStream = item.clone().into();
+
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: Ident = ast.ident;
+
+  quote!(
+    #item_as_stream
+
+    impl #name {}
+  )
+  .into()
+}

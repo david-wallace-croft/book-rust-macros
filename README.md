@@ -45,6 +45,7 @@
 - cargo test --test test_ch04_p072_even
 - cargo expand --test test_ch04_p076_ex1
 - cargo expand --test test_ch04_p076_ex5
+- cargo expand --test test_ch05_p081_recreating
 
 ## History
 
