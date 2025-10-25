@@ -2,6 +2,7 @@
 
 use crate::ch04_p069_parse::StructFieldParse;
 use crate::ch04_p071_going::StructFieldGoing;
+use crate::ch05_p083_generating::generated_methods;
 
 use self::ch04_p067_more::StructField;
 use ::proc_macro::TokenStream;
@@ -30,6 +31,7 @@ mod ch02_p038_ex6;
 mod ch04_p067_more;
 mod ch04_p069_parse;
 mod ch04_p071_going;
+mod ch05_p083_generating;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -440,6 +442,27 @@ pub fn private(item: TokenStream) -> TokenStream {
     #item_as_stream
 
     impl #name {}
+  )
+  .into()
+}
+
+// For test_ch05_p083_generating
+#[proc_macro]
+pub fn private_generating(item: TokenStream) -> TokenStream {
+  let item_as_stream: quote::__private::TokenStream = item.clone().into();
+
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: &Ident = &ast.ident;
+
+  let methods: Vec<proc_macro2::TokenStream> = generated_methods(&ast);
+
+  quote!(
+    #item_as_stream
+
+    impl #name {
+      #(#methods)*
+    }
   )
   .into()
 }
