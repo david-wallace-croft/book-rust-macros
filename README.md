@@ -49,6 +49,7 @@
 - cargo test --test test_ch05_p083_generating
 - cargo expand --test test_ch05_p089_composing
 - cargo test --test test_ch05_p089_composing
+- cargo test --test test_ch05_p096_ex1
 
 ## History
 

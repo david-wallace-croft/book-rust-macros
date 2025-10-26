@@ -489,3 +489,24 @@ pub fn compose(item: TokenStream) -> TokenStream {
   )
   .into()
 }
+
+// For test_ch05_p096_ex1
+#[proc_macro]
+pub fn hello_world(item: TokenStream) -> TokenStream {
+  let item_as_stream: proc_macro2::TokenStream = item.clone().into();
+
+  let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
+
+  let name: &Ident = &ast.ident;
+
+  quote!(
+    #item_as_stream
+
+    impl #name {
+      fn say_hello(&self) -> String {
+        "Hello, World!".into()
+      }
+    }
+  )
+  .into()
+}
