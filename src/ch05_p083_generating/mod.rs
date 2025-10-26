@@ -1,6 +1,6 @@
+use ::proc_macro2::Span;
 use ::proc_macro2::TokenStream as TokenStream2;
 use ::quote::quote;
-use ::syn::__private::*;
 use ::syn::punctuated::Punctuated;
 use ::syn::*;
 

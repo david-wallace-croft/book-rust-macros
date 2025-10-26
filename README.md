@@ -50,6 +50,8 @@
 - cargo expand --test test_ch05_p089_composing
 - cargo test --test test_ch05_p089_composing
 - cargo test --test test_ch05_p096_ex1
+- cargo expand --test test_ch05_p096_ex2
+- cargo test --test test_ch05_p096_ex2
 
 ## History
 
