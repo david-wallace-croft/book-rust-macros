@@ -1,10 +1,10 @@
 // #![warn(clippy::pedantic)]
 
-use crate::ch04_p069_parse::StructFieldParse;
-use crate::ch04_p071_going::StructFieldGoing;
-use crate::ch05_p083_generating::generated_methods;
-
 use self::ch04_p067_more::StructField;
+use self::ch04_p069_parse::StructFieldParse;
+use self::ch04_p071_going::StructFieldGoing;
+use self::ch05_p083_generating::generated_methods;
+use self::ch05_p090_composing::ComposeInput;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::ToTokens;
@@ -32,6 +32,7 @@ mod ch04_p067_more;
 mod ch04_p069_parse;
 mod ch04_p071_going;
 mod ch05_p083_generating;
+mod ch05_p090_composing;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -432,7 +433,7 @@ pub fn public_ex5(
 // For test_ch05_p081_recreating
 #[proc_macro]
 pub fn private(item: TokenStream) -> TokenStream {
-  let item_as_stream: quote::__private::TokenStream = item.clone().into();
+  let item_as_stream: proc_macro2::TokenStream = item.clone().into();
 
   let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
 
@@ -449,7 +450,7 @@ pub fn private(item: TokenStream) -> TokenStream {
 // For test_ch05_p083_generating
 #[proc_macro]
 pub fn private_generating(item: TokenStream) -> TokenStream {
-  let item_as_stream: quote::__private::TokenStream = item.clone().into();
+  let item_as_stream: proc_macro2::TokenStream = item.clone().into();
 
   let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
 
@@ -462,6 +463,28 @@ pub fn private_generating(item: TokenStream) -> TokenStream {
 
     impl #name {
       #(#methods)*
+    }
+  )
+  .into()
+}
+
+// For test_ch05_p090_composing
+#[proc_macro]
+pub fn compose(item: TokenStream) -> TokenStream {
+  let ci: ComposeInput = parse_macro_input!(item);
+
+  quote!(
+    {
+      fn compose_two<FIRST, SECOND, THIRD, F, G>(
+        first: F,
+        second: G,
+      ) -> impl Fn(FIRST) -> THIRD
+      where F: Fn(FIRST) -> SECOND, G: Fn(SECOND) -> THIRD,
+      {
+        move |x| second(first(x))
+      }
+
+      #ci
     }
   )
   .into()
