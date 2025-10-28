@@ -7,6 +7,7 @@ use self::ch05_p083_generating::generated_methods;
 use self::ch05_p090_composing::ComposeInput;
 use self::ch05_p096_ex2::extract_field_names_as_tokens;
 use self::ch05_p096_ex2::generated_fields;
+use self::ch06_p101_fleshing::create_builder;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::ToTokens;
@@ -36,6 +37,7 @@ mod ch04_p071_going;
 mod ch05_p083_generating;
 mod ch05_p090_composing;
 mod ch05_p096_ex2;
+mod ch06_p101_fleshing;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -538,4 +540,10 @@ pub fn private_ex2(item: TokenStream) -> TokenStream {
     }
   )
   .into()
+}
+
+// For test_ch06_p101_fleshing
+#[proc_macro_derive(Builder)]
+pub fn builder(item: TokenStream) -> TokenStream {
+  create_builder(item.into()).into()
 }

@@ -52,6 +52,7 @@
 - cargo test --test test_ch05_p096_ex1
 - cargo expand --test test_ch05_p096_ex2
 - cargo test --test test_ch05_p096_ex2
+- cargo expand --test test_ch06_p101_fleshing
 
 ## History
 
