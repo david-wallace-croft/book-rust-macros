@@ -53,6 +53,7 @@
 - cargo expand --test test_ch05_p096_ex2
 - cargo test --test test_ch05_p096_ex2
 - cargo expand --test test_ch06_p101_fleshing
+- cargo test --lib ch06_p103_adding
 
 ## History
 

@@ -38,6 +38,7 @@ mod ch05_p083_generating;
 mod ch05_p090_composing;
 mod ch05_p096_ex2;
 mod ch06_p101_fleshing;
+mod ch06_p103_adding;
 
 static TRACING_INIT: Once = Once::new();
 
