@@ -21,7 +21,11 @@ pub fn extract_field_names_as_tokens(ast: &DeriveInput) -> Vec<TokenStream2> {
   named_fields
     .iter()
     .map(|field| {
-      let field_name: &Ident = field.ident.as_ref().take().unwrap();
+      let field_ident: &Option<Ident> = &field.ident;
+
+      let field_name_option: Option<&Ident> = field_ident.as_ref();
+
+      let field_name: &Ident = field_name_option.unwrap();
 
       quote! { #field_name }
     })
@@ -46,7 +50,7 @@ pub fn generated_fields(ast: &DeriveInput) -> Vec<TokenStream2> {
   named_fields
     .iter()
     .map(|field| {
-      let field_name: &Ident = field.ident.as_ref().take().unwrap();
+      let field_name: &Ident = field.ident.as_ref().unwrap();
 
       let type_name: &Type = &field.ty;
 

@@ -22,7 +22,7 @@ pub fn generated_methods(ast: &DeriveInput) -> Vec<TokenStream2> {
   named_fields
     .iter()
     .map(|field| {
-      let field_name: &Ident = field.ident.as_ref().take().unwrap();
+      let field_name: &Ident = field.ident.as_ref().unwrap();
 
       let type_name: &Type = &field.ty;
 
