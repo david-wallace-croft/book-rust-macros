@@ -96,7 +96,7 @@ fn builder_methods(
   })
 }
 
-fn get_name_and_type<'a>(f: &'a Field) -> (&'a Option<Ident>, &'a Type) {
+fn get_name_and_type(f: &Field) -> (&Option<Ident>, &Type) {
   let field_name: &Option<Ident> = &f.ident;
 
   let field_type: &Type = &f.ty;
