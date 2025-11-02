@@ -1,0 +1,64 @@
+use ::book_rust_macros::BuilderAlternative;
+
+#[test]
+fn should_generate_builder_for_struct_with_no_properties() {
+  #[derive(BuilderAlternative)]
+  struct ExampleStructNoFields {}
+
+  let _: ExampleStructNoFields = ExampleStructNoFields::builder().build();
+}
+
+#[test]
+fn should_generate_builder_for_struct_with_one_property() {
+  #[derive(BuilderAlternative)]
+  struct Gleipnir {
+    roots_of: String,
+  }
+
+  let gleipnir: Gleipnir = Gleipnir::builder()
+    .roots_of("mountains".to_string())
+    .build();
+
+  assert_eq!(gleipnir.roots_of, "mountains".to_string());
+}
+
+#[test]
+fn should_generate_builder_for_struct_with_two_properties() {
+  #[derive(BuilderAlternative)]
+  struct Gleipnir {
+    roots_of: String,
+    breath_of_a_fish: u8,
+  }
+
+  let gleipnir = Gleipnir::builder()
+    .roots_of("mountains".to_string())
+    .breath_of_a_fish(1)
+    .build();
+
+  assert_eq!(gleipnir.roots_of, "mountains".to_string());
+  assert_eq!(gleipnir.breath_of_a_fish, 1);
+}
+
+#[test]
+fn should_generate_builder_for_struct_with_multiple_properties() {
+  #[derive(BuilderAlternative)]
+  struct Gleipnir {
+    roots_of: String,
+    breath_of_a_fish: u8,
+    other_necessities: Vec<String>,
+  }
+
+  let gleipnir = Gleipnir::builder()
+    .roots_of("mountains".to_string())
+    .breath_of_a_fish(1)
+    .other_necessities(vec![
+      "sound of cat's footsteps".into(),
+      "beard of a woman".into(),
+      "spittle of a bird".into(),
+    ])
+    .build();
+
+  assert_eq!(gleipnir.roots_of, "mountains".to_string());
+  assert_eq!(gleipnir.breath_of_a_fish, 1);
+  assert_eq!(gleipnir.other_necessities.len(), 3);
+}

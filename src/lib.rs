@@ -11,6 +11,7 @@ use self::ch06_p101_fleshing::create_builder;
 use self::ch06_p105_blackbox::create_builder_blackbox;
 use self::ch06_p112_testing::create_builder_testing;
 use self::ch06_p116_further::create_builder_further;
+use self::ch06_p119_alternative::create_builder_alternative;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::ToTokens;
@@ -45,6 +46,7 @@ mod ch06_p103_adding;
 mod ch06_p105_blackbox;
 mod ch06_p112_testing;
 mod ch06_p116_further;
+mod ch06_p119_alternative;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -571,4 +573,10 @@ pub fn builder_testing(item: TokenStream) -> TokenStream {
 #[proc_macro_derive(BuilderFurther)]
 pub fn builder_further(item: TokenStream) -> TokenStream {
   create_builder_further(item.into()).into()
+}
+
+// For test_ch06_p119_alternative
+#[proc_macro_derive(BuilderAlternative)]
+pub fn builder_alternative(item: TokenStream) -> TokenStream {
+  create_builder_alternative(item.into()).into()
 }

@@ -58,6 +58,7 @@
 - cargo test --test test_ch06_p112_testing
 - cargo test --lib ch06_p112_testing
 - cargo test --test test_ch06_p116_further
+- cargo test --test test_ch06_p119_alternative
 
 ## History
 
