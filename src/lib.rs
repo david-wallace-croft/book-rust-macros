@@ -47,6 +47,7 @@ mod ch06_p105_blackbox;
 mod ch06_p112_testing;
 mod ch06_p116_further;
 mod ch06_p119_alternative;
+mod ch06_p127_ex1;
 
 static TRACING_INIT: Once = Once::new();
 
