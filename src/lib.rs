@@ -23,6 +23,7 @@ use ::syn::{
   Data, DeriveInput, Field, Fields, Ident, Type, parse_macro_input, parse2,
 };
 use ::venial::{Declaration, Enum, Struct, parse_declaration};
+use syn::ItemFn;
 
 mod ch02_p013_creating;
 mod ch02_p019_varargs;
@@ -580,4 +581,15 @@ pub fn builder_further(item: TokenStream) -> TokenStream {
 #[proc_macro_derive(BuilderAlternative)]
 pub fn builder_alternative(item: TokenStream) -> TokenStream {
   create_builder_alternative(item.into()).into()
+}
+
+// For test_ch07_p137_setup
+#[proc_macro_attribute]
+pub fn panic_to_result(
+  _a: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let ast: ItemFn = syn::parse(item).unwrap();
+
+  ast.to_token_stream().into()
 }

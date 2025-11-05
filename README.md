@@ -61,6 +61,7 @@
 - cargo test --test test_ch06_p119_alternative
 - cargo test --test test_ch06_p122_unhappy
 - cargo test --lib ch06_p127_ex1
+- cargo test --test test_ch07_p137_setup
 
 ## History
 
