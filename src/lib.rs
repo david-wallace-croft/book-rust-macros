@@ -14,16 +14,17 @@ use self::ch06_p116_further::create_builder_further;
 use self::ch06_p119_alternative::create_builder_alternative;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
+use ::proc_macro2::TokenStream as TokenStream2;
 use ::quote::ToTokens;
 use ::quote::quote;
 use ::std::sync::Once;
 use ::syn::punctuated::{IntoIter, Punctuated};
 use ::syn::token::Comma;
 use ::syn::{
-  Data, DeriveInput, Field, Fields, Ident, Type, parse_macro_input, parse2,
+  Data, DeriveInput, Field, Fields, Ident, ItemFn, ReturnType, Stmt, Type,
+  parse_macro_input, parse2,
 };
 use ::venial::{Declaration, Enum, Struct, parse_declaration};
-use syn::ItemFn;
 
 mod ch02_p013_creating;
 mod ch02_p019_varargs;
@@ -590,6 +591,39 @@ pub fn panic_to_result(
   item: TokenStream,
 ) -> TokenStream {
   let ast: ItemFn = syn::parse(item).unwrap();
+
+  ast.to_token_stream().into()
+}
+
+// For test_ch07_p140_getting
+#[proc_macro_attribute]
+pub fn panic_to_result_getting(
+  _a: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let mut ast: ItemFn = syn::parse(item).unwrap();
+
+  let output: TokenStream2 = match ast.sig.output {
+    ReturnType::Default => {
+      quote! { -> Result<(), String>}
+    },
+    ReturnType::Type(_, ty) => {
+      quote! { -> Result<#ty, String> }
+    },
+  };
+
+  ast.sig.output = syn::parse2(output).unwrap();
+
+  let last: Stmt = ast.block.stmts.pop().unwrap();
+
+  let last_modified: TokenStream2 = quote! {
+    Ok(#last)
+  };
+
+  let last_modified_as_expr: Stmt =
+    Stmt::Expr(syn::parse2(last_modified).unwrap(), None);
+
+  ast.block.stmts.push(last_modified_as_expr);
 
   ast.to_token_stream().into()
 }
