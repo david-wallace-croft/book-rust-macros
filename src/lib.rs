@@ -12,16 +12,18 @@ use self::ch06_p105_blackbox::create_builder_blackbox;
 use self::ch06_p112_testing::create_builder_testing;
 use self::ch06_p116_further::create_builder_further;
 use self::ch06_p119_alternative::create_builder_alternative;
+use self::ch07_p140_getting::{
+  last_statement_as_result, signature_output_as_result,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
-use ::proc_macro2::TokenStream as TokenStream2;
 use ::quote::ToTokens;
 use ::quote::quote;
 use ::std::sync::Once;
 use ::syn::punctuated::{IntoIter, Punctuated};
 use ::syn::token::Comma;
 use ::syn::{
-  Data, DeriveInput, Field, Fields, Ident, ItemFn, ReturnType, Stmt, Type,
+  Data, DeriveInput, Field, Fields, Ident, ItemFn, Stmt, Type,
   parse_macro_input, parse2,
 };
 use ::venial::{Declaration, Enum, Struct, parse_declaration};
@@ -50,6 +52,7 @@ mod ch06_p112_testing;
 mod ch06_p116_further;
 mod ch06_p119_alternative;
 mod ch06_p127_ex1;
+mod ch07_p140_getting;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -603,25 +606,12 @@ pub fn panic_to_result_getting(
 ) -> TokenStream {
   let mut ast: ItemFn = syn::parse(item).unwrap();
 
-  let output: TokenStream2 = match ast.sig.output {
-    ReturnType::Default => {
-      quote! { -> Result<(), String>}
-    },
-    ReturnType::Type(_, ty) => {
-      quote! { -> Result<#ty, String> }
-    },
-  };
+  ast.sig.output = signature_output_as_result(&ast);
 
-  ast.sig.output = syn::parse2(output).unwrap();
-
-  let last: Stmt = ast.block.stmts.pop().unwrap();
-
-  let last_modified: TokenStream2 = quote! {
-    Ok(#last)
-  };
+  let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
 
   let last_modified_as_expr: Stmt =
-    Stmt::Expr(syn::parse2(last_modified).unwrap(), None);
+    last_statement_as_result(last_statement_option);
 
   ast.block.stmts.push(last_modified_as_expr);
 
