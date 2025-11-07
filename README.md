@@ -63,6 +63,7 @@
 - cargo test --lib ch06_p127_ex1
 - cargo test --test test_ch07_p137_setup
 - cargo test --test test_ch07_p140_getting
+- cargo test --test test_ch07_p145_changing
 
 ## History
 

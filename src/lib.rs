@@ -15,6 +15,7 @@ use self::ch06_p119_alternative::create_builder_alternative;
 use self::ch07_p140_getting::{
   last_statement_as_result, signature_output_as_result,
 };
+use self::ch07_p145_changing::handle_expression;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::ToTokens;
@@ -53,6 +54,7 @@ mod ch06_p116_further;
 mod ch06_p119_alternative;
 mod ch06_p127_ex1;
 mod ch07_p140_getting;
+mod ch07_p145_changing;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -607,6 +609,38 @@ pub fn panic_to_result_getting(
   let mut ast: ItemFn = syn::parse(item).unwrap();
 
   ast.sig.output = signature_output_as_result(&ast);
+
+  let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
+
+  let last_modified_as_expr: Stmt =
+    last_statement_as_result(last_statement_option);
+
+  ast.block.stmts.push(last_modified_as_expr);
+
+  ast.to_token_stream().into()
+}
+
+// For test_ch07_p145_changing
+#[proc_macro_attribute]
+pub fn panic_to_result_changing(
+  _a: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let mut ast: ItemFn = syn::parse(item).unwrap();
+
+  ast.sig.output = signature_output_as_result(&ast);
+
+  let new_statements: Vec<Stmt> = ast
+    .block
+    .stmts
+    .into_iter()
+    .map(|s| match s {
+      Stmt::Expr(e, t) => handle_expression(e, t),
+      _ => s,
+    })
+    .collect();
+
+  ast.block.stmts = new_statements;
 
   let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
 
