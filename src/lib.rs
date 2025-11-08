@@ -17,6 +17,9 @@ use self::ch07_p140_getting::{
 };
 use self::ch07_p145_changing::handle_expression;
 use self::ch07_p149_error::signature_output_as_result_error;
+use self::ch07_p150_using::{
+  handle_expression_using, signature_output_as_result_using,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 use ::quote::ToTokens;
@@ -57,6 +60,7 @@ mod ch06_p127_ex1;
 mod ch07_p140_getting;
 mod ch07_p145_changing;
 mod ch07_p149_error;
+mod ch07_p150_using;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -675,6 +679,56 @@ pub fn panic_to_result_error(
     .collect();
 
   ast.block.stmts = new_statements;
+
+  let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
+
+  let last_modified_as_expr: Stmt =
+    last_statement_as_result(last_statement_option);
+
+  ast.block.stmts.push(last_modified_as_expr);
+
+  ast.to_token_stream().into()
+}
+
+// For test_ch07_p150_using
+#[proc_macro_attribute]
+pub fn panic_to_result_using(
+  _a: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let mut ast: ItemFn = syn::parse(item).unwrap();
+
+  let signature_output: Result<syn::ReturnType, syn::Error> =
+    signature_output_as_result_using(&ast);
+
+  let statements_output: Result<Vec<Stmt>, syn::Error> = ast
+    .block
+    .stmts
+    .into_iter()
+    .map(|s| match s {
+      Stmt::Expr(e, t) => handle_expression_using(e, t),
+      _ => Ok(s),
+    })
+    .collect();
+
+  match (statements_output, signature_output) {
+    (Ok(new), Ok(output)) => {
+      ast.block.stmts = new;
+
+      ast.sig.output = output;
+    },
+    (Ok(_), Err(signature_err)) => {
+      return signature_err.to_compile_error().into();
+    },
+    (Err(statement_err), Ok(_)) => {
+      return statement_err.to_compile_error().into();
+    },
+    (Err(mut statement_err), Err(signature_err)) => {
+      statement_err.combine(signature_err);
+
+      return statement_err.to_compile_error().into();
+    },
+  }
 
   let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
 
