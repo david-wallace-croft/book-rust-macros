@@ -12,6 +12,8 @@ rust-version = "1.91.0"
 version = "0.0.0-SNAPSHOT"
 
 [dependencies]
+# https://osv.dev/vulnerability/RUSTSEC-2024-0370
+# proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.103"
 quote = "1.0.41"
 syn = "2.0.108"

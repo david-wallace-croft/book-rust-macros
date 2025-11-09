@@ -20,8 +20,13 @@ use self::ch07_p149_error::signature_output_as_result_error;
 use self::ch07_p150_using::{
   handle_expression_using, signature_output_as_result_using,
 };
+use self::ch07_p155_abort::{
+  handle_expression_abort, signature_output_as_result_abort,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
+// https://osv.dev/vulnerability/RUSTSEC-2024-0370
+// use ::proc_macro_error::proc_macro_error;
 use ::quote::ToTokens;
 use ::quote::quote;
 use ::std::sync::Once;
@@ -61,6 +66,7 @@ mod ch07_p140_getting;
 mod ch07_p145_changing;
 mod ch07_p149_error;
 mod ch07_p150_using;
+mod ch07_p155_abort;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -729,6 +735,42 @@ pub fn panic_to_result_using(
       return statement_err.to_compile_error().into();
     },
   }
+
+  let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
+
+  let last_modified_as_expr: Stmt =
+    last_statement_as_result(last_statement_option);
+
+  ast.block.stmts.push(last_modified_as_expr);
+
+  ast.to_token_stream().into()
+}
+
+// For test_ch07_p155_proc
+// #[proc_macro_error]
+#[proc_macro_attribute]
+pub fn panic_to_result_abort(
+  _a: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let mut ast: ItemFn = syn::parse(item).unwrap();
+
+  let signature_output: syn::ReturnType =
+    signature_output_as_result_abort(&ast).unwrap();
+
+  ast.sig.output = signature_output;
+
+  let new_statements = ast
+    .block
+    .stmts
+    .into_iter()
+    .map(|s| match s {
+      Stmt::Expr(e, t) => handle_expression_abort(e, t),
+      _ => s,
+    })
+    .collect();
+
+  ast.block.stmts = new_statements;
 
   let last_statement_option: Option<Stmt> = ast.block.stmts.pop();
 
