@@ -64,6 +64,7 @@
 - cargo test --test test_ch07_p137_setup
 - cargo test --test test_ch07_p140_getting
 - cargo test --test test_ch07_p145_changing
+- cargo test --test test_ch08_p164_rename
 
 ## History
 
