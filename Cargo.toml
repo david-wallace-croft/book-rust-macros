@@ -8,15 +8,15 @@ name = "book-rust-macros"
 publish = false
 readme = "README.md"
 repository = "https://github.com/david-wallace-croft/book-rust-macros"
-rust-version = "1.91.0"
+rust-version = "1.91"
 version = "0.0.0-SNAPSHOT"
 
 [dependencies]
 # https://osv.dev/vulnerability/RUSTSEC-2024-0370
 # proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.103"
-quote = "1.0.41"
-syn = "2.0.108"
+quote = "1.0.42"
+syn = "2.0.110"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.20"
 venial = "0.5.0"

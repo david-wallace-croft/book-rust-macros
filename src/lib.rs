@@ -24,6 +24,7 @@ use self::ch07_p155_abort::{
   handle_expression_abort, signature_output_as_result_abort,
 };
 use self::ch08_p164_rename::create_builder_rename;
+use self::ch08_p170_naming::create_builder_naming;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
@@ -69,6 +70,7 @@ mod ch07_p149_error;
 mod ch07_p150_using;
 mod ch07_p155_abort;
 mod ch08_p164_rename;
+mod ch08_p170_naming;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -791,4 +793,13 @@ pub fn panic_to_result_abort(
 )]
 pub fn builder_rename(item: TokenStream) -> TokenStream {
   create_builder_rename(item.into()).into()
+}
+
+// For test_ch08_p170_naming
+#[proc_macro_derive(
+  BuilderNaming,
+  attributes(rename)
+)]
+pub fn builder_naming(item: TokenStream) -> TokenStream {
+  create_builder_naming(item.into()).into()
 }
