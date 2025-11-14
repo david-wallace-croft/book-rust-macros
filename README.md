@@ -66,6 +66,7 @@
 - cargo test --test test_ch07_p145_changing
 - cargo test --test test_ch08_p164_rename
 - cargo test --test test_ch08_p170_naming
+- cargo test --test test_ch08_p173_sensible
 
 ## History
 
