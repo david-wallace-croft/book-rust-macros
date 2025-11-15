@@ -1,23 +1,15 @@
 use ::proc_macro2::TokenStream as TokenStream2;
-use ::quote::{format_ident, quote, quote_spanned};
+use ::quote::{format_ident, quote};
 use ::syn::{
-  Attribute, Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, Ident,
-  LitStr, Meta, punctuated::Punctuated, token::Comma,
+  Data, DataStruct, DeriveInput, Field, Fields, FieldsNamed, Ident, Type,
+  punctuated::Punctuated, token::Comma,
 };
-use syn::spanned::Spanned;
-use syn::{Expr, ExprLit, Lit, MetaNameValue, Type};
-
-const ATTRIBUTE_NAME_DEFAULTS: &str = "builder_defaults";
 
 #[allow(dead_code)]
 pub fn create_builder_build(item: TokenStream2) -> TokenStream2 {
   let ast: DeriveInput = syn::parse2(item).unwrap();
 
   let name: Ident = ast.ident;
-
-  let builder: Ident = format_ident!("{}Builder", name);
-
-  let use_defaults = use_defaults(&ast.attrs);
 
   let fields: &Punctuated<Field, Comma> = match ast.data {
     Data::Struct(DataStruct {
@@ -30,128 +22,292 @@ pub fn create_builder_build(item: TokenStream2) -> TokenStream2 {
     _ => unimplemented!(),
   };
 
-  let builder_fields = builder_field_definitions(fields);
+  let builder: TokenStream2 = builder_definition(&name, fields);
 
-  let builder_inits = builder_init_values(fields);
+  let builder_method_for_struct: TokenStream2 =
+    builder_impl_for_struct(&name, fields);
 
-  let builder_methods: Vec<TokenStream2> = builder_methods(fields);
+  let marker_and_structs: TokenStream2 =
+    marker_trait_and_structs(&name, fields);
 
-  let set_fields: Vec<TokenStream2> =
-    original_struct_setters(fields, use_defaults);
-
-  let default_assertions: Vec<TokenStream2> = if use_defaults {
-    optional_default_asserts(fields)
-  } else {
-    vec![]
-  };
+  let builder_methods: TokenStream2 = builder_methods(&name, fields);
 
   quote! {
-    struct #builder {
+    #builder
+
+    #builder_method_for_struct
+
+    #marker_and_structs
+
+    #builder_methods
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// private functions (in alphabetical order)
+////////////////////////////////////////////////////////////////////////////////
+
+fn builder_definition(
+  name: &Ident,
+  fields: &Punctuated<Field, Comma>,
+) -> TokenStream2 {
+  let builder_fields = fields.iter().map(|f: &Field| {
+    let (field_name, field_type) = get_name_and_type(f);
+
+    quote! { #field_name: Option<#field_type> }
+  });
+
+  let builder_name: Ident = create_builder_ident(name);
+
+  quote! {
+    pub struct #builder_name<T: MarkerTraitForBuilder> {
+      marker: std::marker::PhantomData<T>,
+
       #(#builder_fields,)*
     }
+  }
+}
 
-    impl #builder {
-      #(#builder_methods)*
+fn builder_impl_for_struct(
+  struct_name: &Ident,
+  fields: &Punctuated<Field, Comma>,
+) -> TokenStream2 {
+  let builder_inits = fields.iter().map(|f: &Field| {
+    let field_name: &Option<Ident> = &f.ident;
 
-      pub fn build(self) -> #name {
-        #name {
-          #(#set_fields,)*
-        }
-      }
-    }
+    quote! { #field_name: None }
+  });
 
-    impl #name {
-      pub fn builder() -> #builder {
-        #builder {
+  let first_field_name: Ident = fields
+    .first()
+    .map(|f: &Field| f.ident.clone().unwrap())
+    .unwrap();
+
+  let builder_name: Ident = create_builder_ident(struct_name);
+
+  let generic: Ident =
+    create_field_struct_name(&builder_name, &first_field_name);
+
+  quote! {
+    impl #struct_name {
+      pub fn builder() -> #builder_name<#generic> {
+        #builder_name {
+          marker: Default::default(),
           #(#builder_inits,)*
         }
       }
     }
-
-    #(#default_assertions)*
   }
 }
 
-fn builder_init_values(
-  fields: &Punctuated<Field, Comma>
-) -> impl Iterator<Item = TokenStream2> + '_ {
-  fields.iter().map(|f: &Field| {
-    let field_name: &Option<Ident> = &f.ident;
+// fn builder_init_values(
+//   fields: &Punctuated<Field, Comma>
+// ) -> impl Iterator<Item = TokenStream2> + '_ {
+//   fields.iter().map(|f: &Field| {
+//     let field_name: &Option<Ident> = &f.ident;
 
-    quote! { #field_name: None }
-  })
+//     quote! { #field_name: None }
+//   })
+// }
+
+// fn builder_field_definitions(
+//   fields: &Punctuated<Field, Comma>
+// ) -> impl Iterator<Item = TokenStream2> + '_ {
+//   fields.iter().map(|f: &Field| {
+//     let (field_name, field_type) = get_name_and_type(f);
+
+//     quote! { #field_name: Option<#field_type> }
+//   })
+// }
+
+fn builder_for_field(
+  builder_name: &Ident,
+  field_assignments: &Vec<TokenStream2>,
+  current_field: &Field,
+  next_field_in_list: &Field,
+) -> TokenStream2 {
+  let (field_name, field_type) = get_name_and_type(current_field);
+
+  let (next_field_name, _) = get_name_and_type(next_field_in_list);
+
+  let current_field_struct_name: Ident =
+    create_field_struct_name(&builder_name, field_name.as_ref().unwrap());
+
+  let next_field_struct_name: Ident =
+    create_field_struct_name(&builder_name, next_field_name.as_ref().unwrap());
+
+  quote! {
+    impl #builder_name<#current_field_struct_name> {
+      pub fn #field_name(mut self, input: #field_type) -> #builder_name<#next_field_struct_name> {
+        self.#field_name = Some(input);
+
+        #builder_name {
+          marker: Default::default(),
+          #(#field_assignments,)*
+        }
+      }
+    }
+  }
 }
 
-fn builder_field_definitions(
-  fields: &Punctuated<Field, Comma>
-) -> impl Iterator<Item = TokenStream2> + '_ {
-  fields.iter().map(|f: &Field| {
-    let (field_name, field_type) = get_name_and_type(f);
+fn builder_for_final_field(
+  builder_name: &Ident,
+  field_assignments: &Vec<TokenStream2>,
+  field: &Field,
+) -> TokenStream2 {
+  let (field_name, field_type) = get_name_and_type(field);
 
-    quote! { #field_name: Option<#field_type> }
-  })
+  let field_struct_name: Ident =
+    create_field_struct_name(&builder_name, field_name.as_ref().unwrap());
+
+  quote! {
+    impl #builder_name<#field_struct_name> {
+      pub fn #field_name(mut self, input: #field_type) -> #builder_name<FinalBuilder> {
+        self.#field_name = Some(input);
+
+        #builder_name {
+          marker: Default::default(),
+          #(#field_assignments,)*
+        }
+      }
+    }
+  }
 }
 
-fn builder_methods(fields: &Punctuated<Field, Comma>) -> Vec<TokenStream2> {
-  fields
+fn builder_methods(
+  struct_name: &Ident,
+  fields: &Punctuated<Field, Comma>,
+) -> TokenStream2 {
+  let builder_name: Ident = create_builder_ident(struct_name);
+
+  let set_fields: Vec<TokenStream2> = original_struct_setters(fields, false);
+
+  let assignments_for_all_fields: Vec<TokenStream2> =
+    get_assignments_for_fields(fields);
+
+  let mut previous_field: Option<&&Field> = None;
+
+  let reversed_names_and_types: Vec<&Field> = fields.iter().rev().collect();
+
+  let methods: Vec<TokenStream2> = reversed_names_and_types
     .iter()
-    .map(|f: &Field| {
-      let field_name: &Option<Ident> = &f.ident;
+    .map(|f| {
+      if let Some(next_in_list) = previous_field {
+        previous_field = Some(f);
 
-      let field_type: &Type = &f.ty;
+        builder_for_field(
+          &builder_name,
+          &assignments_for_all_fields,
+          f,
+          next_in_list,
+        )
+      } else {
+        previous_field = Some(f);
 
-      extract_attribute_from_field(f, "rename")
-        .map(|a: &Attribute| &a.meta)
-        .map(|m: &syn::Meta| match m {
-          Meta::Path(_) => {
-            panic!("expected brackets with name of prop")
-          },
-          Meta::List(nested) => {
-            let a: LitStr = nested.parse_args().unwrap();
-
-            Ident::new(&a.value(), a.span())
-          },
-          Meta::NameValue(MetaNameValue {
-            value:
-              Expr::Lit(ExprLit {
-                lit: Lit::Str(literal_string),
-                ..
-              }),
-            ..
-          }) => Ident::new(&literal_string.value(), literal_string.span()),
-          _ => panic!("expected something else"),
-        })
-        .map(|attr| {
-          quote! {
-            pub fn #attr(mut self, input: #field_type) -> Self {
-              self.#field_name = Some(input);
-
-              self
-            }
-          }
-        })
-        .unwrap_or_else(|| {
-          quote! {
-            pub fn #field_name(mut self, input: #field_type) -> Self {
-              self.#field_name = Some(input);
-
-              self
-            }
-          }
-        })
+        builder_for_final_field(&builder_name, &assignments_for_all_fields, f)
+      }
     })
-    .collect()
+    .collect();
+
+  quote! {
+    #(#methods)*
+
+    impl #builder_name<FinalBuilder> {
+      pub fn build(self) -> #struct_name {
+        #struct_name {
+          #(#set_fields,)*
+        }
+      }
+    }
+  }
+}
+
+// fn builder_methods(fields: &Punctuated<Field, Comma>) -> Vec<TokenStream2> {
+//   fields
+//     .iter()
+//     .map(|f: &Field| {
+//       let field_name: &Option<Ident> = &f.ident;
+
+//       let field_type: &Type = &f.ty;
+
+//       extract_attribute_from_field(f, "rename")
+//         .map(|a: &Attribute| &a.meta)
+//         .map(|m: &syn::Meta| match m {
+//           Meta::Path(_) => {
+//             panic!("expected brackets with name of prop")
+//           },
+//           Meta::List(nested) => {
+//             let a: LitStr = nested.parse_args().unwrap();
+
+//             Ident::new(&a.value(), a.span())
+//           },
+//           Meta::NameValue(MetaNameValue {
+//             value:
+//               Expr::Lit(ExprLit {
+//                 lit: Lit::Str(literal_string),
+//                 ..
+//               }),
+//             ..
+//           }) => Ident::new(&literal_string.value(), literal_string.span()),
+//           _ => panic!("expected something else"),
+//         })
+//         .map(|attr| {
+//           quote! {
+//             pub fn #attr(mut self, input: #field_type) -> Self {
+//               self.#field_name = Some(input);
+
+//               self
+//             }
+//           }
+//         })
+//         .unwrap_or_else(|| {
+//           quote! {
+//             pub fn #field_name(mut self, input: #field_type) -> Self {
+//               self.#field_name = Some(input);
+
+//               self
+//             }
+//           }
+//         })
+//     })
+//     .collect()
+// }
+
+fn create_builder_ident(name: &Ident) -> Ident {
+  format_ident!("{}Builder", name)
+}
+
+fn create_field_struct_name(
+  builder_name: &Ident,
+  field_name: &Ident,
+) -> Ident {
+  format_ident!("{}Of{}", field_name, builder_name)
 }
 
 fn default_fallback() -> TokenStream2 {
   quote! { unwrap_or_default() }
 }
 
-fn extract_attribute_from_field<'a>(
-  f: &'a Field,
-  name: &'a str,
-) -> Option<&'a syn::Attribute> {
-  f.attrs.iter().find(|&attr| attr.path().is_ident(name))
+// fn extract_attribute_from_field<'a>(
+//   f: &'a Field,
+//   name: &'a str,
+// ) -> Option<&'a syn::Attribute> {
+//   f.attrs.iter().find(|&attr| attr.path().is_ident(name))
+// }
+
+fn get_assignments_for_fields(
+  fields: &Punctuated<Field, Comma>
+) -> Vec<TokenStream2> {
+  fields
+    .iter()
+    .map(|f: &Field| {
+      let (field_name, _) = get_name_and_type(f);
+
+      quote! {
+        #field_name: self.#field_name
+      }
+    })
+    .collect()
 }
 
 fn get_name_and_type(f: &Field) -> (&Option<Ident>, &Type) {
@@ -162,24 +318,54 @@ fn get_name_and_type(f: &Field) -> (&Option<Ident>, &Type) {
   (field_name, field_type)
 }
 
-fn optional_default_asserts(
-  fields: &Punctuated<Field, Comma>
-) -> Vec<TokenStream2> {
-  fields
-    .iter()
-    .map(|f: &Field| {
-      let name: &&Ident = &f.ident.as_ref().unwrap();
+fn marker_trait_and_structs(
+  name: &Ident,
+  fields: &Punctuated<Field, Comma>,
+) -> TokenStream2 {
+  let builder_name: Ident = create_builder_ident(name);
 
-      let ty: &Type = &f.ty;
+  let structs_and_impls = fields.iter().map(|f: &Field| {
+    let field_name: &Ident = &f.ident.clone().unwrap();
 
-      let assertion_ident: Ident = format_ident!("__{}DefaultAssertion", name);
+    let struct_name: Ident =
+      create_field_struct_name(&builder_name, field_name);
 
-      quote_spanned! {
-        ty.span() => struct #assertion_ident where #ty: core::default::Default;
-      }
-    })
-    .collect()
+    quote! {
+      pub struct #struct_name {}
+
+      impl MarkerTraitForBuilder for #struct_name {}
+    }
+  });
+
+  quote! {
+    pub trait MarkerTraitForBuilder {}
+
+    #(#structs_and_impls)*
+
+    pub struct FinalBuilder {}
+
+    impl MarkerTraitForBuilder for FinalBuilder {}
+  }
 }
+
+// fn optional_default_asserts(
+//   fields: &Punctuated<Field, Comma>
+// ) -> Vec<TokenStream2> {
+//   fields
+//     .iter()
+//     .map(|f: &Field| {
+//       let name: &&Ident = &f.ident.as_ref().unwrap();
+
+//       let ty: &Type = &f.ty;
+
+//       let assertion_ident: Ident = format_ident!("__{}DefaultAssertion", name);
+
+//       quote_spanned! {
+//         ty.span() => struct #assertion_ident where #ty: core::default::Default;
+//       }
+//     })
+//     .collect()
+// }
 
 fn original_struct_setters(
   fields: &Punctuated<Field, Comma>,
@@ -193,7 +379,7 @@ fn original_struct_setters(
       let field_name_as_string: String =
         field_name.as_ref().unwrap().to_string();
 
-      let handle_type = if use_defaults {
+      let handle_type: TokenStream2 = if use_defaults {
         default_fallback()
       } else {
         panic_fallback(field_name_as_string)
@@ -210,11 +396,15 @@ fn panic_fallback(field_name_as_string: String) -> TokenStream2 {
   }
 }
 
-fn use_defaults(attrs: &[Attribute]) -> bool {
-  attrs.iter().any(|attribute: &Attribute| {
-    attribute.path().is_ident(ATTRIBUTE_NAME_DEFAULTS)
-  })
-}
+// fn use_defaults(attrs: &[Attribute]) -> bool {
+//   attrs.iter().any(|attribute: &Attribute| {
+//     attribute.path().is_ident(ATTRIBUTE_NAME_DEFAULTS)
+//   })
+// }
+
+////////////////////////////////////////////////////////////////////////////////
+// unit tests
+////////////////////////////////////////////////////////////////////////////////
 
 mod test {
   #![allow(unused_imports)]
