@@ -1,10 +1,10 @@
 #![allow(non_camel_case_types)]
 
-use ::book_rust_macros::BuilderBetter;
+use ::book_rust_macros::BuilderBuild;
 
 #[test]
 fn should_generate_builder_for_struct_with_no_properties() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct ExampleStructNoFields {}
 
   let _: ExampleStructNoFields = ExampleStructNoFields::builder().build();
@@ -12,7 +12,7 @@ fn should_generate_builder_for_struct_with_no_properties() {
 
 #[test]
 fn should_generate_builder_for_struct_with_one_property() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     roots_of: String,
   }
@@ -26,7 +26,7 @@ fn should_generate_builder_for_struct_with_one_property() {
 
 #[test]
 fn should_generate_builder_for_struct_with_one_renamed_prop() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     #[rename = "tops_of"]
     roots_of: String,
@@ -40,7 +40,7 @@ fn should_generate_builder_for_struct_with_one_renamed_prop() {
 
 #[test]
 fn should_generate_builder_for_struct_with_one_renamed_property() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     #[rename("tops_of")]
     roots_of: String,
@@ -54,7 +54,7 @@ fn should_generate_builder_for_struct_with_one_renamed_property() {
 
 #[test]
 fn should_generate_builder_for_struct_with_two_properties() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     roots_of: String,
     breath_of_a_fish: u8,
@@ -71,7 +71,7 @@ fn should_generate_builder_for_struct_with_two_properties() {
 
 #[test]
 fn should_generate_builder_for_struct_with_two_props_one_custom_name() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     #[rename("tops_of")]
     roots_of: String,
@@ -89,7 +89,7 @@ fn should_generate_builder_for_struct_with_two_props_one_custom_name() {
 
 #[test]
 fn should_generate_builder_for_struct_with_multiple_properties() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     roots_of: String,
     breath_of_a_fish: u8,
@@ -114,7 +114,7 @@ fn should_generate_builder_for_struct_with_multiple_properties() {
 #[test]
 #[should_panic]
 fn should_panic_when_field_is_missing() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   struct Gleipnir {
     #[allow(dead_code)]
     roots_of: String,
@@ -125,7 +125,7 @@ fn should_panic_when_field_is_missing() {
 
 #[test]
 fn should_use_defaults_when_attribute_is_present() {
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   #[builder_defaults]
   struct ExampleStructTwoFields {
     int_value: i32,
@@ -145,10 +145,32 @@ fn should_fail_to_compile_when_does_not_implement_defaults() {
   struct DoesNotImplementDefault;
 
   #[expect(dead_code)]
-  #[derive(BuilderBetter)]
+  #[derive(BuilderBuild)]
   // Unremark to see the compile error
   // #[builder_defaults]
   struct ExampleStruct {
     not: DoesNotImplementDefault,
   }
+}
+
+#[test]
+fn should_work_with_correct_order() {
+  #[derive(BuilderBuild)]
+  struct Gleipnir {
+    anything_else: bool,
+    breath_of_a_fish: u8,
+    roots_of: String,
+  }
+
+  let gleipnir: Gleipnir = Gleipnir::builder()
+    .anything_else(true)
+    .breath_of_a_fish(1)
+    .roots_of("mountains".into())
+    .build();
+
+  assert_eq!(gleipnir.anything_else, true);
+
+  assert_eq!(gleipnir.breath_of_a_fish, 1);
+
+  assert_eq!(gleipnir.roots_of, "mountains");
 }
