@@ -27,6 +27,7 @@ use self::ch08_p164_rename::create_builder_rename;
 use self::ch08_p170_naming::create_builder_naming;
 use self::ch08_p173_sensible::create_builder_sensible;
 use self::ch08_p177_better::create_builder_better;
+use self::ch08_p179_build::create_builder_build;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
@@ -75,6 +76,7 @@ mod ch08_p164_rename;
 mod ch08_p170_naming;
 mod ch08_p173_sensible;
 mod ch08_p177_better;
+mod ch08_p179_build;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -830,4 +832,16 @@ pub fn builder_sensible(item: TokenStream) -> TokenStream {
 )]
 pub fn builder_better(item: TokenStream) -> TokenStream {
   create_builder_better(item.into()).into()
+}
+
+// For test_ch08_p179_build
+#[proc_macro_derive(
+  BuilderBuild,
+  attributes(
+    builder_defaults,
+    rename
+  )
+)]
+pub fn builder_build(item: TokenStream) -> TokenStream {
+  create_builder_build(item.into()).into()
 }

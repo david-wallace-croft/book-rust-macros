@@ -68,6 +68,7 @@
 - cargo test --test test_ch08_p170_naming
 - cargo test --test test_ch08_p173_sensible
 - cargo expand --test test_ch08_p177_better
+- cargo test --test test_ch08_p179_build
 
 ## History
 
