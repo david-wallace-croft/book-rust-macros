@@ -131,10 +131,10 @@ fn builder_for_field(
   let (next_field_name, _) = get_name_and_type(next_field_in_list);
 
   let current_field_struct_name: Ident =
-    create_field_struct_name(&builder_name, field_name.as_ref().unwrap());
+    create_field_struct_name(builder_name, field_name.as_ref().unwrap());
 
   let next_field_struct_name: Ident =
-    create_field_struct_name(&builder_name, next_field_name.as_ref().unwrap());
+    create_field_struct_name(builder_name, next_field_name.as_ref().unwrap());
 
   quote! {
     impl #builder_name<#current_field_struct_name> {
@@ -158,7 +158,7 @@ fn builder_for_final_field(
   let (field_name, field_type) = get_name_and_type(field);
 
   let field_struct_name: Ident =
-    create_field_struct_name(&builder_name, field_name.as_ref().unwrap());
+    create_field_struct_name(builder_name, field_name.as_ref().unwrap());
 
   quote! {
     impl #builder_name<#field_struct_name> {

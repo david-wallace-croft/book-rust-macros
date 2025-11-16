@@ -70,6 +70,7 @@
 - cargo expand --test test_ch08_p177_better
 - cargo test --test test_ch08_p179_build
 - cargo expand --test test_ch08_p179_build
+- cargo test --test test_ch08_p201_ex1
 
 ## History
 
