@@ -71,6 +71,7 @@
 - cargo test --test test_ch08_p179_build
 - cargo expand --test test_ch08_p179_build
 - cargo test --test test_ch08_p201_ex1
+- cargo test --test test_ch09_p207_parsing
 
 ## History
 

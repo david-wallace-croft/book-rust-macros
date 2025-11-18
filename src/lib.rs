@@ -29,6 +29,7 @@ use self::ch08_p173_sensible::create_builder_sensible;
 use self::ch08_p177_better::create_builder_better;
 use self::ch08_p179_build::create_builder_build;
 use self::ch08_p201_ex1::create_builder_ex1;
+use self::ch09_p207_parsing::IacInput;
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
@@ -79,6 +80,7 @@ mod ch08_p173_sensible;
 mod ch08_p177_better;
 mod ch08_p179_build;
 mod ch08_p201_ex1;
+mod ch09_p207_parsing;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -855,4 +857,14 @@ pub fn builder_build(item: TokenStream) -> TokenStream {
 )]
 pub fn builder_ex1(item: TokenStream) -> TokenStream {
   create_builder_ex1(item.into()).into()
+}
+
+// For test_ch09_p207_parsing
+#[proc_macro]
+pub fn iac(item: TokenStream) -> TokenStream {
+  let ii: IacInput = parse_macro_input!(item);
+
+  eprintln!("{ii:?}");
+
+  quote!().into()
 }
