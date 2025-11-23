@@ -73,6 +73,7 @@
 - cargo test --test test_ch08_p201_ex1
 - cargo test --test test_ch09_p207_parsing
 - cargo test --test test_ch09_p215_struct
+- cargo test --test test_ch09_p218_using
 
 ## History
 
