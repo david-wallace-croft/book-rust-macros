@@ -173,7 +173,7 @@ impl Parse for Lambda {
       },
     );
 
-    Ok(builder.build()?)
+    builder.build()
   }
 }
 
@@ -297,10 +297,7 @@ impl Parse for LambdaProperty {
 
       Ok(LambdaProperty::Time(value))
     } else {
-      Err(syn::Error::new(
-        input.span(),
-        format!("unknown property for lambda"),
-      ))
+      Err(syn::Error::new(input.span(), "unknown property for lambda"))
     }
   }
 }

@@ -21,11 +21,9 @@ pub fn find_yaml_values(
     )
   })?;
 
-  Ok(
-    serde_yaml::from_reader(file).map_err(|e: serde_yaml::Error| {
-      syn::Error::new(Span::call_site(), e.to_string())
-    })?,
-  )
+  serde_yaml::from_reader(file).map_err(|e: serde_yaml::Error| {
+    syn::Error::new(Span::call_site(), e.to_string())
+  })
 }
 
 pub fn generate_config_struct(
