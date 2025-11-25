@@ -32,12 +32,16 @@ use self::ch08_p201_ex1::create_builder_ex1;
 use self::ch09_p207_parsing::IacInput;
 use self::ch09_p215_struct::IacInputStruct;
 use self::ch09_p218_using::IacInputUsing;
+use self::ch10_p236_function::{
+  ConfigInput, find_yaml_values, generate_config_struct,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
 // use ::proc_macro_error::proc_macro_error;
 use ::quote::ToTokens;
 use ::quote::quote;
+use ::std::collections::HashMap;
 use ::std::sync::Once;
 use ::syn::punctuated::{IntoIter, Punctuated};
 use ::syn::token::Comma;
@@ -85,6 +89,7 @@ mod ch08_p201_ex1;
 mod ch09_p207_parsing;
 mod ch09_p215_struct;
 mod ch09_p218_using;
+mod ch10_p236_function;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -891,4 +896,18 @@ pub fn iac_using(item: TokenStream) -> TokenStream {
   eprintln!("{ii:?}");
 
   quote!().into()
+}
+
+// For test_ch10_p236_function
+#[proc_macro]
+pub fn config(item: TokenStream) -> TokenStream {
+  let config_input: ConfigInput = parse_macro_input!(item);
+
+  let result: Result<HashMap<String, String>, syn::Error> =
+    find_yaml_values(config_input);
+
+  match result {
+    Ok(values) => generate_config_struct(values).into(),
+    Err(e) => e.into_compile_error().into(),
+  }
 }

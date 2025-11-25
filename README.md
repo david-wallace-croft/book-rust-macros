@@ -74,6 +74,8 @@
 - cargo test --test test_ch09_p207_parsing
 - cargo test --test test_ch09_p215_struct
 - cargo test --test test_ch09_p218_using
+- cargo test --test test_ch10_p236_function
+- cargo expand --test test_ch10_p236_function
 
 ## History
 
