@@ -35,6 +35,9 @@ use self::ch09_p218_using::IacInputUsing;
 use self::ch10_p236_function::{
   ConfigInput, find_yaml_values, generate_config_struct,
 };
+use self::ch10_p242_adding::{
+  ConfigInputStruct, find_yaml_values_struct, generate_annotation_struct,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
@@ -90,6 +93,7 @@ mod ch09_p207_parsing;
 mod ch09_p215_struct;
 mod ch09_p218_using;
 mod ch10_p236_function;
+mod ch10_p242_adding;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -908,6 +912,22 @@ pub fn config(item: TokenStream) -> TokenStream {
 
   match result {
     Ok(values) => generate_config_struct(values).into(),
+    Err(e) => e.into_compile_error().into(),
+  }
+}
+
+// For test_ch10_p242_adding
+#[proc_macro_attribute]
+pub fn config_struct(
+  attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let config_input_struct: ConfigInputStruct = parse_macro_input!(attr);
+
+  let ast: DeriveInput = parse_macro_input!(item);
+
+  match find_yaml_values_struct(config_input_struct) {
+    Ok(values) => generate_annotation_struct(ast, values).into(),
     Err(e) => e.into_compile_error().into(),
   }
 }

@@ -76,6 +76,8 @@
 - cargo test --test test_ch09_p218_using
 - cargo test --test test_ch10_p236_function
 - cargo expand --test test_ch10_p236_function
+- cargo test --test test_ch10_p242_adding
+- cargo expand --test test_ch10_p242_adding
 
 ## History
 
