@@ -80,6 +80,7 @@
 - cargo expand --test test_ch10_p242_adding
 - cargo test --test test_ch10_p243_features
 - cargo test --test test_ch10_p243_features --features struct
+- cargo expand --test test_ch10_p243_features --features struct
 
 ## History
 

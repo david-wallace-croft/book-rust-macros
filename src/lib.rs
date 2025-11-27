@@ -949,8 +949,12 @@ pub fn config_features(
 
   let ast: DeriveInput = parse_macro_input!(item);
 
+  let exclude_from_method: bool = config_input_features.exclude_from;
+
   match find_yaml_values_features(config_input_features) {
-    Ok(values) => generate_annotation_features(ast, values).into(),
+    Ok(values) => {
+      generate_annotation_features(ast, values, &exclude_from_method).into()
+    },
     Err(e) => e.into_compile_error().into(),
   }
 }

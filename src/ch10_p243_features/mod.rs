@@ -14,7 +14,7 @@ pub fn find_yaml_values_features(
 ) -> Result<HashMap<String, String>, syn::Error> {
   let file_name: String = config_input_features
     .path
-    .unwrap_or_else(|| "./configuration/config.yaml".to_string());
+    .unwrap_or_else(|| "tests/test_ch10_p243_features.yaml".to_string());
 
   let file: File = File::open(&file_name).map_err(|err: io::Error| {
     syn::Error::new(
@@ -31,6 +31,7 @@ pub fn find_yaml_values_features(
 pub fn generate_annotation_features(
   derive_input: DeriveInput,
   yaml_values: HashMap<String, String>,
+  exclude_from_method: &bool,
 ) -> TokenStream2 {
   let attributes: &Vec<syn::Attribute> = &derive_input.attrs;
 
@@ -39,6 +40,12 @@ pub fn generate_annotation_features(
   let fields: Vec<TokenStream2> = generate_fields(&yaml_values);
 
   let inits: Vec<TokenStream2> = generate_inits(&yaml_values);
+
+  let from: TokenStream2 = if !exclude_from_method {
+    quote!()
+  } else {
+    generate_from_method(name, &yaml_values)
+  };
 
   quote! {
     #(#attributes)*
@@ -53,6 +60,8 @@ pub fn generate_annotation_features(
         }
       }
     }
+
+    #from
   }
 }
 
@@ -67,6 +76,25 @@ fn generate_fields(yaml_values: &HashMap<String, String>) -> Vec<TokenStream2> {
       }
     })
     .collect()
+}
+
+fn generate_from_method(
+  name: &Ident,
+  yaml_values: &HashMap<String, String>,
+) -> TokenStream2 {
+  let inserts: Vec<TokenStream2> = generate_inserts_for_from(yaml_values);
+
+  quote! {
+    impl From<#name> for std::collections::HashMap<String, String> {
+      fn from(value: #name) -> Self {
+        let mut map = std::collections::HashMap::new();
+
+        #(#inserts)*
+
+        map
+      }
+    }
+  }
 }
 
 fn generate_inits(yaml_values: &HashMap<String, String>) -> Vec<TokenStream2> {
@@ -84,8 +112,26 @@ fn generate_inits(yaml_values: &HashMap<String, String>) -> Vec<TokenStream2> {
     .collect()
 }
 
+fn generate_inserts_for_from(
+  yaml_values: &HashMap<String, String>
+) -> Vec<TokenStream2> {
+  yaml_values
+    .iter()
+    .map(|v: (&String, &String)| {
+      let key: &String = v.0;
+
+      let key_as_ident = Ident::new(key, Span::call_site());
+
+      quote!(
+        map.insert(#key.to_string(), value.#key_as_ident);
+      )
+    })
+    .collect()
+}
+
 #[derive(Debug)]
 pub struct ConfigInputFeatures {
+  pub exclude_from: bool,
   pub path: Option<String>,
 }
 
@@ -93,35 +139,57 @@ impl Parse for ConfigInputFeatures {
   fn parse(input: ParseStream) -> syn::Result<Self> {
     if input.is_empty() {
       return Ok(ConfigInputFeatures {
+        exclude_from: false,
         path: None,
       });
     }
 
-    if !input.peek(kw::path) {
-      return Err(syn::Error::new(
-        input.span(),
-        "config macro only allows for 'path' input",
-      ));
+    if input.peek(kw::path) {
+      let _: kw::path = input.parse().expect("checked that this exists");
+
+      let _: Token!(=) = input.parse().map_err(|_| {
+        syn::Error::new(input.span(), "expected equals sign after path")
+      })?;
+
+      let value: LitStr = input.parse().map_err(|_| {
+        syn::Error::new(input.span(), "expected value after the equals sign")
+      })?;
+
+      return Ok(ConfigInputFeatures {
+        exclude_from: false,
+        path: Some(value.value()),
+      });
     }
 
-    let _: kw::path = input.parse().expect("checked that this exists");
+    if input.peek(kw::exclude) {
+      let _: kw::exclude = input.parse().expect("checked that this exists");
 
-    let _: Token!(=) = input.parse().map_err(|_| {
-      syn::Error::new(input.span(), "expected equals sign after path")
-    })?;
+      let _: Token!(=) = input.parse().map_err(|_| {
+        syn::Error::new(input.span(), "expected equals sign after exclude")
+      })?;
 
-    let value: LitStr = input.parse().map_err(|_| {
-      syn::Error::new(input.span(), "expected value after the equals sign")
-    })?;
+      let value: LitStr = input.parse().map_err(|_| {
+        syn::Error::new(input.span(), "expected value after the equals sign")
+      })?;
 
-    Ok(ConfigInputFeatures {
-      path: Some(value.value()),
-    })
+      let exclude_from: bool = value.value() == "from";
+
+      return Ok(ConfigInputFeatures {
+        exclude_from,
+        path: None,
+      });
+    }
+
+    return Err(syn::Error::new(
+      input.span(),
+      "config macro only allows for 'exclude' or 'path' input",
+    ));
   }
 }
 
 mod kw {
   use ::syn::custom_keyword;
 
+  custom_keyword!(exclude);
   custom_keyword!(path);
 }
