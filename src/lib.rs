@@ -38,6 +38,10 @@ use self::ch10_p236_function::{
 use self::ch10_p242_adding::{
   ConfigInputStruct, find_yaml_values_struct, generate_annotation_struct,
 };
+#[cfg(feature = "struct")]
+use self::ch10_p243_features::{
+  ConfigInputFeatures, find_yaml_values_features, generate_annotation_features,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
@@ -94,6 +98,8 @@ mod ch09_p215_struct;
 mod ch09_p218_using;
 mod ch10_p236_function;
 mod ch10_p242_adding;
+#[cfg(feature = "struct")]
+mod ch10_p243_features;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -928,6 +934,23 @@ pub fn config_struct(
 
   match find_yaml_values_struct(config_input_struct) {
     Ok(values) => generate_annotation_struct(ast, values).into(),
+    Err(e) => e.into_compile_error().into(),
+  }
+}
+
+// For test_ch10_p243_features
+#[cfg(feature = "struct")]
+#[proc_macro_attribute]
+pub fn config_features(
+  attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let config_input_features: ConfigInputFeatures = parse_macro_input!(attr);
+
+  let ast: DeriveInput = parse_macro_input!(item);
+
+  match find_yaml_values_features(config_input_features) {
+    Ok(values) => generate_annotation_features(ast, values).into(),
     Err(e) => e.into_compile_error().into(),
   }
 }

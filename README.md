@@ -78,6 +78,8 @@
 - cargo expand --test test_ch10_p236_function
 - cargo test --test test_ch10_p242_adding
 - cargo expand --test test_ch10_p242_adding
+- cargo test --test test_ch10_p243_features
+- cargo test --test test_ch10_p243_features --features struct
 
 ## History
 
