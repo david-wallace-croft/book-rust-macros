@@ -9,12 +9,12 @@ use ::syn::{
 use syn::DeriveInput;
 use syn::Ident;
 
-pub fn find_yaml_values_features(
-  config_input_features: ConfigInputFeatures
+pub fn find_yaml_values_ex1(
+  config_input_features: ConfigInputEx1
 ) -> Result<HashMap<String, String>, syn::Error> {
   let file_name: String = config_input_features
     .path
-    .unwrap_or_else(|| "tests/test_ch10_p243_features.yaml".to_string());
+    .unwrap_or_else(|| "./configuration/config.yaml".to_string());
 
   let file: File = File::open(&file_name).map_err(|err: io::Error| {
     syn::Error::new(
@@ -28,7 +28,7 @@ pub fn find_yaml_values_features(
   })
 }
 
-pub fn generate_annotation_features(
+pub fn generate_annotation_ex1(
   derive_input: DeriveInput,
   yaml_values: HashMap<String, String>,
   exclude_from_method: &bool,
@@ -130,60 +130,58 @@ fn generate_inserts_for_from(
 }
 
 #[derive(Debug)]
-pub struct ConfigInputFeatures {
+pub struct ConfigInputEx1 {
   pub exclude_from: bool,
   pub path: Option<String>,
 }
 
-impl Parse for ConfigInputFeatures {
+impl Parse for ConfigInputEx1 {
   fn parse(input: ParseStream) -> syn::Result<Self> {
-    if input.is_empty() {
-      return Ok(ConfigInputFeatures {
-        exclude_from: false,
-        path: None,
-      });
+    let mut exclude_from: bool = false;
+
+    let mut path: Option<String> = None;
+
+    loop {
+      if input.is_empty() {
+        return Ok(ConfigInputEx1 {
+          exclude_from,
+          path,
+        });
+      }
+
+      if input.peek(kw::exclude) {
+        let _: kw::exclude = input.parse().expect("checked that this exists");
+
+        let _: Token!(=) = input.parse().map_err(|_| {
+          syn::Error::new(input.span(), "expected equals sign after exclude")
+        })?;
+
+        let value: LitStr = input.parse().map_err(|_| {
+          syn::Error::new(input.span(), "expected value after the equals sign")
+        })?;
+
+        exclude_from = value.value() == "from";
+      } else if input.peek(kw::path) {
+        let _: kw::path = input.parse().expect("checked that this exists");
+
+        let _: Token!(=) = input.parse().map_err(|_| {
+          syn::Error::new(input.span(), "expected equals sign after path")
+        })?;
+
+        let value: LitStr = input.parse().map_err(|_| {
+          syn::Error::new(input.span(), "expected value after the equals sign")
+        })?;
+
+        path = Some(value.value());
+      } else if input.peek(Token!(,)) {
+        let _: Token!(,) = input.parse().expect("checked that this exists");
+      } else {
+        return Err(syn::Error::new(
+          input.span(),
+          "config macro only allows for 'exclude' or 'path' input",
+        ));
+      }
     }
-
-    if input.peek(kw::path) {
-      let _: kw::path = input.parse().expect("checked that this exists");
-
-      let _: Token!(=) = input.parse().map_err(|_| {
-        syn::Error::new(input.span(), "expected equals sign after path")
-      })?;
-
-      let value: LitStr = input.parse().map_err(|_| {
-        syn::Error::new(input.span(), "expected value after the equals sign")
-      })?;
-
-      return Ok(ConfigInputFeatures {
-        exclude_from: false,
-        path: Some(value.value()),
-      });
-    }
-
-    if input.peek(kw::exclude) {
-      let _: kw::exclude = input.parse().expect("checked that this exists");
-
-      let _: Token!(=) = input.parse().map_err(|_| {
-        syn::Error::new(input.span(), "expected equals sign after exclude")
-      })?;
-
-      let value: LitStr = input.parse().map_err(|_| {
-        syn::Error::new(input.span(), "expected value after the equals sign")
-      })?;
-
-      let exclude_from: bool = value.value() == "from";
-
-      return Ok(ConfigInputFeatures {
-        exclude_from,
-        path: None,
-      });
-    }
-
-    return Err(syn::Error::new(
-      input.span(),
-      "config macro only allows for 'exclude' or 'path' input",
-    ));
   }
 }
 
