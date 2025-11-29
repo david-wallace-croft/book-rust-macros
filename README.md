@@ -6,8 +6,10 @@
 [mit-url]: https://github.com/david-wallace-croft/book-rust-macros/blob/main/LICENSE.txt
 
 - Code adapted from the book "Write Powerful Rust Macros" by Sam Van Overmeire
-  - https://www.manning.com/books/write-powerful-rust-macros
-  - https://livebook.manning.com/forum?product=vanovermeire
+  - [https://www.manning.com/books/write-powerful-rust-macros](
+     https://www.manning.com/books/write-powerful-rust-macros)
+  - [https://livebook.manning.com/forum?product=vanovermeire](
+     https://livebook.manning.com/forum?product=vanovermeire)
 
 ## Usage
 

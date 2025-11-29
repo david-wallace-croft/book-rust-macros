@@ -1,4 +1,5 @@
 // #![warn(clippy::pedantic)]
+#![doc = include_str!("../README.md")]
 
 use self::ch04_p067_more::StructField;
 use self::ch04_p069_parse::StructFieldParse;
