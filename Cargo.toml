@@ -19,12 +19,13 @@ quote = "1.0.42"
 serde = "1.0.228"
 serde_yaml = "0.9.34-deprecated"
 syn = { version = "2.0.111", features = ["extra-traits"] }
-tracing = "0.1.41"
-tracing-subscriber = "0.3.20"
+tracing = "0.1.43"
+tracing-subscriber = "0.3.22"
 venial = "0.5.0"
 
 [features]
-# default = ["struct"]
+default = []
+include = []
 struct = []
 
 [lib]

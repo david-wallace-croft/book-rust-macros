@@ -45,6 +45,9 @@ use self::ch10_p243_features::{
 use self::ch10_p258_ex1::{
   ConfigInputEx1, find_yaml_values_ex1, generate_annotation_ex1,
 };
+use self::ch10_p258_ex2::{
+  ConfigInputEx2, find_yaml_values_ex2, generate_annotation_ex2,
+};
 use ::proc_macro::TokenStream;
 use ::proc_macro::TokenTree;
 // https://osv.dev/vulnerability/RUSTSEC-2024-0370
@@ -104,6 +107,7 @@ mod ch10_p242_adding;
 #[cfg(feature = "struct")]
 mod ch10_p243_features;
 mod ch10_p258_ex1;
+mod ch10_p258_ex2;
 
 static TRACING_INIT: Once = Once::new();
 
@@ -979,6 +983,22 @@ pub fn config_ex1(
     Ok(values) => {
       generate_annotation_ex1(ast, values, &exclude_from_method).into()
     },
+    Err(e) => e.into_compile_error().into(),
+  }
+}
+
+// For test_ch10_p258_ex2
+#[proc_macro_attribute]
+pub fn config_ex2(
+  attr: TokenStream,
+  item: TokenStream,
+) -> TokenStream {
+  let config_input_ex2: ConfigInputEx2 = parse_macro_input!(attr);
+
+  let ast: DeriveInput = parse_macro_input!(item);
+
+  match find_yaml_values_ex2(config_input_ex2) {
+    Ok(values) => generate_annotation_ex2(ast, values).into(),
     Err(e) => e.into_compile_error().into(),
   }
 }
