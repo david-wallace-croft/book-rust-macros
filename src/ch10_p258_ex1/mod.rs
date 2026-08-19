@@ -19,7 +19,7 @@ pub fn find_yaml_values_ex1(
   let file: File = File::open(&file_name).map_err(|err: io::Error| {
     syn::Error::new(
       Span::call_site(),
-      format!("could not read config with path {}: {}", &file_name, err),
+      format!("could not read config with path {}: {}", file_name, err),
     )
   })?;
 

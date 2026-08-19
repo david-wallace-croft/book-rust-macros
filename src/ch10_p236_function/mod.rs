@@ -17,7 +17,7 @@ pub fn find_yaml_values(
   let file: File = File::open(&file_name).map_err(|err: io::Error| {
     syn::Error::new(
       Span::call_site(),
-      format!("could not read config with path {}: {}", &file_name, err),
+      format!("could not read config with path {}: {}", file_name, err),
     )
   })?;
 
@@ -32,7 +32,7 @@ pub fn generate_config_struct(
   let inserts: Vec<TokenStream2> = generate_inserts(yaml_values);
 
   quote! {
-    pub struct Config(pub std::collections::HashMap<String, String>);
+    pub struct Config(pub ::std::collections::HashMap<String, String>);
 
     impl Config {
       pub fn new() -> Self {

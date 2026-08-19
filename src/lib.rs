@@ -388,7 +388,7 @@ pub fn public_going(
 ) -> TokenStream {
   let ast: DeriveInput = parse_macro_input!(item as DeriveInput);
 
-  eprintln!("{:#?}", &ast);
+  eprintln!("{:#?}", ast);
 
   let name: Ident = ast.ident;
 

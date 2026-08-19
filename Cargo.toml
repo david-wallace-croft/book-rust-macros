@@ -8,19 +8,19 @@ name = "book-rust-macros"
 publish = false
 readme = "README.md"
 repository = "https://github.com/david-wallace-croft/book-rust-macros"
-rust-version = "1.91"
-version = "0.0.0-SNAPSHOT"
+rust-version = "1.97"
+version = "0.0.1-SNAPSHOT"
 
 [dependencies]
 # https://osv.dev/vulnerability/RUSTSEC-2024-0370
 # proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.103"
-quote = "1.0.42"
-serde = "1.0.228"
+proc-macro2 = "1.0.107"
+quote = "1.0.47"
+serde = "1.0.229"
 serde_yaml = "0.9.34-deprecated"
-syn = { version = "2.0.111", features = ["extra-traits"] }
-tracing = "0.1.43"
-tracing-subscriber = "0.3.22"
+syn = { version = "2.0.119", features = ["extra-traits"] }
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
 venial = "0.5.0"
 
 [features]
