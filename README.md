@@ -1,9 +1,12 @@
 # Book Rust Macros
 
 [![MIT licensed][mit-badge]][mit-url]
+[![Rust][status-badge]][status-url]
 
 [mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [mit-url]: https://github.com/david-wallace-croft/book-rust-macros/blob/main/LICENSE.txt
+[status-badge]: https://github.com/david-wallace-croft/book-rust-macros/actions/workflows/rust.yml/badge.svg
+[status-url]: https://github.com/david-wallace-croft/book-rust-macros/actions/workflows/rust.yml
 
 - Code adapted from the book "Write Powerful Rust Macros" by Sam Van Overmeire
   - [https://www.manning.com/books/write-powerful-rust-macros](
